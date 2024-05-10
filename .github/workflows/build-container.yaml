@@ -65,6 +65,7 @@ jobs:
           image_tag: main
           version: 40
           variant: Workstation
+          flatpak_remote_refs_dir: flatpaks_refs
 
       - name: Upload ISO as artifact
         id: upload
