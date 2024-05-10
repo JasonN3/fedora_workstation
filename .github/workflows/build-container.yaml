@@ -75,12 +75,13 @@ jobs:
         id: build
         uses: JasonN3/build-container-installer@main
         with:
+          flatpak_remote_refs_dir: flatpak_refs
           image_name: fedora_workstation
           image_repo: ghcr.io/jasonn3
           image_tag: ${{ github.ref_name }}
+          iso_name: workstation-${{ github.ref_name }}.iso
           version: 40
           variant: Workstation
-          flatpak_remote_refs_dir: flatpak_refs
 
       - name: Upload ISO as artifact
         id: upload
