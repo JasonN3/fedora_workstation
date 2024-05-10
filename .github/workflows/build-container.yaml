@@ -2,7 +2,6 @@ name: Build Container
 
 on:
   push:
-    branch:
 
 jobs:
   build-container:
@@ -47,3 +46,32 @@ jobs:
           tags: ${{ steps.build-image.outputs.tags }}
           username: ${{ github.actor }}
           password: ${{ github.token }}
+
+  build-iso:
+    name: Build ISO Installer
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Build ISO
+        id: build
+        uses: JasonN3/build-container-installer@main
+        with:
+          image_name: fedora_workstation
+          image_repo: ghcr.io/jasonn3
+          image_tag: main
+          version: 40
+          variant: Workstation
+
+      - name: Upload ISO as artifact
+        id: upload
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.build.outputs.iso_name }}
+          path: |
+            ${{ steps.build.outputs.iso_path }}
+            ${{ steps.build.outputs.iso_path }}-CHECKSUM
+          if-no-files-found: error
+          retention-days: 0
+          compression-level: 0
