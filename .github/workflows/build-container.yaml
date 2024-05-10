@@ -3,7 +3,6 @@ name: Build Container
 on:
   push:
     branch:
-      - main
 
 jobs:
   build-container:
