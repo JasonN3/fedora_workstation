@@ -7,7 +7,7 @@ RUN mkdir /var/roothome
 RUN dnf group install -y 'Fedora Workstation'
 
 # Remove unwanted packages
-RUN dnf remove -y cockpit
+RUN dnf remove -y firefox
 
 # Cleanup temp directories
 RUN rm -Rf /var/roothome
