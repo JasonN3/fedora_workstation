@@ -64,7 +64,7 @@ jobs:
           image_tag: ${{ github.ref_name }}
           version: 40
           variant: Workstation
-          flatpak_remote_refs_dir: flatpaks_refs
+          flatpak_remote_refs_dir: flatpak_refs
 
       - name: Upload ISO as artifact
         id: upload
