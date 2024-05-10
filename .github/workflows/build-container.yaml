@@ -79,7 +79,6 @@ jobs:
           image_name: fedora_workstation
           image_repo: ghcr.io/jasonn3
           image_tag: ${{ github.ref_name }}
-          iso_name: workstation-${{ github.ref_name }}.iso
           version: 40
           variant: Workstation
 
