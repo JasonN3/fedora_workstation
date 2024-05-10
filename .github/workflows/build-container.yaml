@@ -13,10 +13,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          submodules: recursive
-          fetch-depth: 0
-          fetch-tags: 'true'
 
       - name: Docker meta
         id: meta
@@ -56,13 +52,16 @@ jobs:
       contents: read
       packages: write
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Build ISO
         id: build
         uses: JasonN3/build-container-installer@main
         with:
           image_name: fedora_workstation
           image_repo: ghcr.io/jasonn3
-          image_tag: main
+          image_tag: ${{ github.ref_name }}
           version: 40
           variant: Workstation
           flatpak_remote_refs_dir: flatpaks_refs
