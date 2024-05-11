@@ -55,7 +55,7 @@ jobs:
           for tag in ${TAGS}; do
             if [[ -z "${digest}" ]]
             then
-              digest=$(docker images --digests ${tag} | tail -n 1 | awk '{print $3}')
+              digest=$(podman images --digests ${tag} | tail -n 1 | awk '{print $3}')
             fi
             images+="${tag}@${digest} "
           done
