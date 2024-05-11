@@ -6,6 +6,9 @@ RUN mkdir /var/roothome
 # Install Workstation
 RUN dnf group install -y 'Fedora Workstation'
 
+# Install additional packages
+RUN dnf install -y virt-manager
+
 # Remove unwanted packages
 RUN dnf remove -y firefox
 
