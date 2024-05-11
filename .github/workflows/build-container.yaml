@@ -63,7 +63,7 @@ jobs:
           for tag in ${TAGS}; do
             if [[ -z "${digest}" ]]
             then
-              digest=$(cat $(echo ${tag} | tr '/@' '--')_digest.txt)
+              digest=$(cat $(echo ${tag} | tr '/:' '--')_digest.txt)
             fi
             images+="${tag}@${digest} "
           done
