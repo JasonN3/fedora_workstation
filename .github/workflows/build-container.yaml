@@ -32,9 +32,9 @@ jobs:
         uses: redhat-actions/buildah-build@v2
         with:
           containerfiles: Containerfile
-          tags: ${{ steps.meta.outputs.tags || steps.meta_pr.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels || steps.meta_pr.outputs.labels }}
-
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+      
       - name: Push image
         uses: redhat-actions/push-to-registry@v2
         with:
@@ -42,6 +42,24 @@ jobs:
           tags: ${{ steps.build-image.outputs.tags }}
           username: ${{ github.actor }}
           password: ${{ github.token }}
+
+      - name: cosign-installer
+        uses: sigstore/cosign-installer@v3.5.0
+
+      - name: Sign the images with GitHub OIDC Token
+        env:
+          TAGS: ${{ steps.build-image.tags }}
+        run: |
+          images=""
+          digest=""
+          for tag in ${TAGS}; do
+            if [[ -z "${digest}" ]]
+            then
+              digest=$(docker images --digests ${tag} | tail -n 1 | awk '{print $3}')
+            fi
+            images+="${tag}@${digest} "
+          done
+          cosign sign --yes ${images}
 
   build-iso:
     name: Build ISO Installer
