@@ -58,8 +58,9 @@ jobs:
         if: github.ref_name == 'main'
         env:
           TAGS: ${{ steps.build-image.outputs.tags }}
+          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
+          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
         run: |
-          echo '${{ secrets.SIGNING_KEY }}' | base64 -d > cosign.key
           images=""
           digest=""
           for tag in ${TAGS}; do
@@ -69,8 +70,7 @@ jobs:
             fi
             images+="${tag}@${digest} "
           done
-          cosign sign --key cosign.key --yes ${images}
-          rm cosign.key
+          cosign sign --key env://COSIGN_PRIVATE_KEY --yes ${images}
 
   build-iso:
     name: Build ISO Installer
