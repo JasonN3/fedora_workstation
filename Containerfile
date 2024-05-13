@@ -23,3 +23,5 @@ RUN dnf remove -y firefox
 
 # Disable non-functional services
 RUN systemctl disable systemd-remount-fs.service gssproxy.service
+
+COPY rootfs/ /

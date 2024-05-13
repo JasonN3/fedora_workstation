@@ -1,0 +1,23 @@
+{
+  "default": [
+    {
+      "type": "insecureAcceptAnything"
+    }
+  ],
+  "transports": {
+    "docker-daemon": {
+      "": [{"type":"insecureAcceptAnything"}]
+    },
+    "docker": {
+      "ghcr.io/jasonn3": [
+        {
+          "type": "sigstoreSigned",
+          "keyPath": "/usr/etc/pki/containers/fedora_workstation.pub",
+          "signedIdentity": {
+            "type": "matchRepository"
+          }
+        }
+      ]
+    }
+  }
+}
