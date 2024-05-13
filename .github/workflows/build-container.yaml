@@ -28,6 +28,13 @@ jobs:
             type=semver,pattern=v{{major}}.{{minor}}
             type=semver,pattern=v{{major}}.{{minor}}.{{patch}}
 
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2.1.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Buildah Build
         id: build-image
         uses: redhat-actions/buildah-build@v2
@@ -35,13 +42,6 @@ jobs:
           containerfiles: Containerfile
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v2.1.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Push image
         uses: redhat-actions/push-to-registry@v2
@@ -55,6 +55,7 @@ jobs:
         uses: sigstore/cosign-installer@v3.5.0
 
       - name: Sign the images with GitHub OIDC Token
+        if: github.red_name == 'main'
         env:
           TAGS: ${{ steps.build-image.outputs.tags }}
         run: |
