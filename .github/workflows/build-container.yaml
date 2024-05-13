@@ -64,6 +64,7 @@ jobs:
           TAGS: ${{ steps.build-image.outputs.tags }}
           COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+          COSIGN_PUBLIC_KEY: ${{ secrets.COSIGN_PUBLIC_KEY }}
         run: |
           images=""
           digest=""
@@ -75,6 +76,7 @@ jobs:
             images+="${tag}@${digest} "
           done
           cosign sign --key env://COSIGN_PRIVATE_KEY --yes ${images}
+          echo '${COSIGN_PUBLIC_KEY}' | base64 -w0
 
   build-iso:
     name: Build ISO Installer
