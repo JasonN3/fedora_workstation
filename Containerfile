@@ -16,7 +16,7 @@ RUN dnf clean all
 FROM workstation
 
 # Install additional packages
-RUN dnf install -y virt-manager
+RUN dnf install -y virt-manager ceph-fuse
 
 # Remove unwanted packages
 RUN dnf remove -y firefox
