@@ -55,7 +55,7 @@ jobs:
         uses: sigstore/cosign-installer@v3.5.0
 
       - name: Sign the images with GitHub OIDC Token
-        if: github.red_name == 'main'
+        if: github.ref_name == 'main'
         env:
           TAGS: ${{ steps.build-image.outputs.tags }}
         run: |
