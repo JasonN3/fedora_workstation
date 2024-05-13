@@ -20,3 +20,6 @@ RUN dnf install -y virt-manager
 
 # Remove unwanted packages
 RUN dnf remove -y firefox
+
+# Disable non-functional services
+systemctl disable systemd-remount-fs.service gssproxy.service
