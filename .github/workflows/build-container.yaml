@@ -63,6 +63,8 @@ jobs:
           cat << EOF > rootfs/usr/libexec/firstboot/playbooks.env
           export VAULT_ADDR="${{ secrets.VAULT_ADDR }}"
           export VAULT_PATH="${{ secrets.VAULT_PATH }}"
+          export PREFIX="${{ secrets.PREFIX }}"
+          export DOMAIN="${{ secrets.DOMAIN }}"
           EOF
 
       - name: Buildah Build
