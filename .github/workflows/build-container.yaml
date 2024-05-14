@@ -45,7 +45,7 @@ jobs:
           }
 
           ensuredir rootfs/usr/etc/ostree
-          AUTH=$(echo -n "${{ gitub.actor }}:${{ secrets.READ_PACKAGES }}" | base64 -w0)
+          AUTH=$(echo -n "${{ github.actor }}:${{ secrets.READ_PACKAGES }}" | base64 -w0)
           cat << EOF > rootfs/usr/etc/ostree/auth.json
           {
             "auths": {
