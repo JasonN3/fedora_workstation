@@ -35,6 +35,36 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Add Secrets to Image
+        run: |
+          ensuredir() {
+            if [[ ! -d $1 ]]
+            then
+              mkdir -p $1
+            fi
+          }
+
+          ensuredir rootfs/usr/etc/ostree
+          AUTH=$(echo -n "${{ gitub.actor }}:${{ secrets.READ_PACKAGES }}" | base64 -w0)
+          cat << EOF > rootfs/usr/etc/ostree/auth.json
+          {
+            "auths": {
+              "ghcr.io/jasonn3": {
+                "auth": "${AUTH}"
+              }
+            }
+          }
+          EOF
+
+          ensuredir rootfs/usr/lib/vault
+          echo "${{ secrets.ROLE_ID }}" > rootfs/usr/lib/vault/role_id
+
+          ensuredir rootfs/usr/libexec/firstboot
+          cat << EOF > rootfs/usr/libexec/firstboot/playbooks.env
+          export VAULT_ADDR="${{ secrets.VAULT_ADDR }}"
+          export VAULT_PATH="${{ secrets.VAULT_PATH }}"
+          EOF
+
       - name: Buildah Build
         id: build-image
         uses: redhat-actions/buildah-build@v2

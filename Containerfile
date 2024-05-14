@@ -1,4 +1,4 @@
-FROM ghcr.io/jasonn3/fedora_base:main AS workstation
+FROM ghcr.io/jasonn3/fedora_base:configure AS workstation
 
 # Temporarily create directories needed for installing
 RUN mkdir /var/roothome /var/lib/alternatives
