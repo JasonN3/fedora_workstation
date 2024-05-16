@@ -22,7 +22,7 @@ RUN curl -Lo vscode.rpm "https://code.visualstudio.com/sha/download?build=stable
   dnf install -y code
 
 # Install additional packages
-RUN dnf install -y virt-manager ceph-base ceph-fuse man
+RUN dnf install -y virt-manager ceph-base ceph-fuse man NetworkManager-l2tp-gnome
 
 # Remove unwanted packages
 RUN dnf remove -y firefox
