@@ -15,17 +15,20 @@ RUN dnf clean all
 # Split custom work to separate image layer
 FROM workstation
 
+# Install VSCode
+RUN curl -Lo vscode.rpm "https://code.visualstudio.com/sha/download?build=stable&os=linux-rpm-x64"; \
+  dnf install -y vscode.rpm; \
+  rm -f vscode.rpm; \
+  dnf install -y code
+
 # Install additional packages
 RUN dnf install -y virt-manager ceph-base ceph-fuse man
 
 # Remove unwanted packages
 RUN dnf remove -y firefox
 
-# Create sym link for qemu socket
-RUN ln -s ../../run/libvirt /var/run/libvirt
-
 # Disable non-functional services
-RUN systemctl disable systemd-remount-fs.service gssproxy.service
+RUN systemctl disable systemd-remount-fs.service
 
 # Enable services
 RUN systemctl enable virtqemud.socket
