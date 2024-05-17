@@ -15,6 +15,8 @@ RUN dnf clean all
 # Split custom work to separate image layer
 FROM workstation
 
+COPY rootfs/ /
+
 # Install VSCode
 RUN dnf install -y code
 
@@ -30,4 +32,4 @@ RUN systemctl disable systemd-remount-fs.service
 # Enable services
 RUN systemctl enable virtqemud.socket
 
-COPY rootfs/ /
+
