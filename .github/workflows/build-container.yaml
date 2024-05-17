@@ -1,6 +1,10 @@
 name: Build Container
 
 on:
+  repository_dispatch:
+    types:
+      - rebuild
+
   push:
 
 jobs:
