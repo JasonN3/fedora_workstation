@@ -16,10 +16,7 @@ RUN dnf clean all
 FROM workstation
 
 # Install VSCode
-RUN curl -Lo vscode.rpm "https://code.visualstudio.com/sha/download?build=stable&os=linux-rpm-x64"; \
-  dnf install -y vscode.rpm; \
-  rm -f vscode.rpm; \
-  dnf install -y code
+RUN dnf install -y code
 
 # Install additional packages
 RUN dnf install -y virt-manager ceph-base ceph-fuse man NetworkManager-l2tp-gnome
