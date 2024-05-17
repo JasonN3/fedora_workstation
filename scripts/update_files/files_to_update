@@ -1,0 +1,2 @@
+rootfs/usr/etc/ostree/auth.json ${AUTH}
+rootfs/usr/lib/vault/role_id ${ROLE_ID}

@@ -40,37 +40,21 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Add Secrets to Image
+      - name: Run scripts
+        env:
+          VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
+          VAULT_PATH: ${{ secrets.VAULT_PATH }}
+          PREFIX: ${{ secrets.PREFIX }}
+          DOMAIN: ${{ secrets.DOMAIN }}
+          GHCR_AUTH: "${{ github.actor }}:${{ secrets.READ_PACKAGES }}"
+          ROLE_ID: ${{ secrets.ROLE_ID }}
         run: |
-          ensuredir() {
-            if [[ ! -d $1 ]]
-            then
-              mkdir -p $1
-            fi
-          }
-
-          ensuredir rootfs/usr/etc/ostree
-          AUTH=$(echo -n "${{ github.actor }}:${{ secrets.READ_PACKAGES }}" | base64 -w0)
-          cat << EOF > rootfs/usr/etc/ostree/auth.json
-          {
-            "auths": {
-              "ghcr.io/jasonn3": {
-                "auth": "${AUTH}"
-              }
-            }
-          }
-          EOF
-
-          ensuredir rootfs/usr/lib/vault
-          echo "${{ secrets.ROLE_ID }}" > rootfs/usr/lib/vault/role_id
-
-          ensuredir rootfs/usr/libexec/firstboot
-          cat << EOF > rootfs/usr/libexec/firstboot/playbooks.env
-          VAULT_ADDR="${{ secrets.VAULT_ADDR }}"
-          VAULT_PATH="${{ secrets.VAULT_PATH }}"
-          PREFIX="${{ secrets.PREFIX }}"
-          DOMAIN="${{ secrets.DOMAIN }}"
-          EOF
+          export VAULT_TOKEN=$(cat .vault-token)
+          for script in set_perms update_files
+          do
+            chmod +x scripts/${script}/${script}.sh
+            ./scripts/${script}/${script}.sh
+          done
 
       - name: Buildah Build
         id: build-image
