@@ -1,3 +1,3 @@
 #!/bin/bash
 
-authselect enable-feature with-smartcard
+authselect enable-feature with-smartcard-required
