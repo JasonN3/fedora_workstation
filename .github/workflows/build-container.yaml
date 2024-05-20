@@ -11,7 +11,7 @@ jobs:
   build-container:
     name: Build Container Image
     environment: prod
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     permissions:
       contents: read
       packages: write
