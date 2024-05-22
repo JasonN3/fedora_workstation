@@ -9,9 +9,6 @@ RUN dnf group install -y 'Fedora Workstation'
 # Cleanup temp directories
 RUN rm -Rf /var/roothome
 
-# Cleanup cache
-RUN dnf clean all
-
 # Split custom work to separate image layer
 FROM workstation
 

@@ -1,3 +1,6 @@
 #!/bin/bash
 
-echo "subid:      sss" >> /etc/nsswitch.conf
+if ! (authselect current | grep with-subid)
+then
+    authselect enable-feature with-subuid
+fi
