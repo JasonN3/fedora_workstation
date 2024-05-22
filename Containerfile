@@ -29,6 +29,6 @@ RUN dnf remove -y firefox
 # RUN /usr/etc/systemd/system/systemd-remount-fs.service
 
 # Enable services
-RUN ln -s /usr/lib/systemd/system/virtqemud.socket /usr/etc/systemd/system/sockets.target.wants/virtqemud.socket
+RUN mkdir -p /usr/etc/systemd/system/sockets.target.wants && ln -s /usr/lib/systemd/system/virtqemud.socket /usr/etc/systemd/system/sockets.target.wants/virtqemud.socket
 
 RUN dnf clean all
