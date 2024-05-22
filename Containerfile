@@ -9,6 +9,8 @@ RUN dnf group install -y 'Fedora Workstation'
 # Cleanup temp directories
 RUN rm -Rf /var/roothome
 
+RUN dnf clean all
+
 # Split custom work to separate image layer
 FROM workstation
 
@@ -29,4 +31,4 @@ RUN dnf remove -y firefox
 # Enable services
 RUN ln -s /usr/lib/systemd/system/virtqemud.socket /usr/etc/systemd/system/sockets.target.wants/virtqemud.socket
 
-
+RUN dnf clean all
