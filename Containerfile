@@ -24,9 +24,9 @@ RUN dnf install -y virt-manager ceph-base ceph-fuse man NetworkManager-l2tp-gnom
 RUN dnf remove -y firefox
 
 # Disable non-functional services
-RUN systemctl disable systemd-remount-fs.service
+# RUN /usr/etc/systemd/system/systemd-remount-fs.service
 
 # Enable services
-RUN systemctl enable virtqemud.socket
+RUN ln -s /usr/lib/systemd/system/virtqemud.socket /usr/etc/systemd/system/sockets.target.wants/virtqemud.socket
 
 
