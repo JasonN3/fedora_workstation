@@ -31,4 +31,6 @@ RUN dnf remove -y firefox
 # Enable services
 RUN mkdir -p /usr/etc/systemd/system/sockets.target.wants && ln -s /usr/lib/systemd/system/virtqemud.socket /usr/etc/systemd/system/sockets.target.wants/virtqemud.socket
 
+RUN dnf upgrade -y
+
 RUN dnf clean all
