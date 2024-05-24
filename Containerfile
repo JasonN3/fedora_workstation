@@ -20,17 +20,15 @@ COPY rootfs/ /
 RUN dnf install -y code
 
 # Install additional packages
-RUN dnf install -y virt-manager ceph-base ceph-fuse man NetworkManager-l2tp-gnome wine
+RUN dnf install -y virt-manager ceph-base ceph-fuse man NetworkManager-l2tp-gnome
 
 # Remove unwanted packages
 RUN dnf remove -y firefox
 
 # Disable non-functional services
-# RUN /usr/etc/systemd/system/systemd-remount-fs.service
+# RUN rm /usr/etc/systemd/system/systemd-remount-fs.service
 
 # Enable services
 RUN mkdir -p /usr/etc/systemd/system/sockets.target.wants && ln -s /usr/lib/systemd/system/virtqemud.socket /usr/etc/systemd/system/sockets.target.wants/virtqemud.socket
-
-RUN dnf upgrade -y
 
 RUN dnf clean all
