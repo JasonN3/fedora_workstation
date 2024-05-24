@@ -20,7 +20,8 @@ COPY rootfs/ /
 RUN dnf install -y code
 
 # Install additional packages
-RUN dnf install -y virt-manager ceph-base ceph-fuse man NetworkManager-l2tp-gnome
+RUN dnf install -y virt-manager man NetworkManager-l2tp-gnome
+# ceph-base ceph-fuse wine
 
 # Remove unwanted packages
 RUN dnf remove -y firefox
