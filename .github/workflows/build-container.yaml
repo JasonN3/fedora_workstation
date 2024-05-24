@@ -75,10 +75,14 @@ jobs:
   
   sign-container:
     if: github.ref_name == 'main'
-    name: Build Container Image
+    name: Sign Container Image
     environment: prod
     needs:
       - build-container
+    permissions:
+      contents: read
+      packages: write
+      id-token: write # needed for signing the images with GitHub OIDC Token
     runs-on: self-hosted
     steps:
       - name: Install Cosign
