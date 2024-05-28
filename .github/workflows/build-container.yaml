@@ -41,6 +41,16 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Auth with Vault
+        env:
+          VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
+        run: |
+          vault write \
+            -field=token \
+            auth/approle/login \
+            role_id=$(cat /home/runner/.vault-role) \
+            secret_id=${{ secrets.VAULT_SECRET }} > .vault-token
 
       - name: Run scripts
         env:
