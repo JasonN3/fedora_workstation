@@ -11,6 +11,7 @@ jobs:
   build-container:
     name: Build Container Image
     runs-on: self-hosted
+    environment: prod
     permissions:
       contents: read
       packages: write
