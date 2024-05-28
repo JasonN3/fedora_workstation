@@ -14,6 +14,9 @@ RUN dnf clean all
 # Split custom work to separate image layer
 FROM workstation
 
+# Temporarily create directories needed for installing
+RUN mkdir /var/roothome
+
 COPY rootfs/ /
 
 # Install VSCode
@@ -30,5 +33,8 @@ RUN dnf remove -y firefox
 
 # Enable services
 #RUN mkdir -p /usr/etc/systemd/system/sockets.target.wants && ln -s /usr/lib/systemd/system/virtqemud.socket /usr/etc/systemd/system/sockets.target.wants/virtqemud.socket
+
+# Cleanup temp directories
+RUN rm -Rf /var/roothome
 
 RUN dnf clean all
