@@ -16,8 +16,6 @@ jobs:
       contents: read
       packages: write
       id-token: write # needed for signing the images with GitHub OIDC Token
-    outputs:
-      tags: ${{ steps.build-image.outputs.tags }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -84,18 +82,6 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ github.token }}
   
-  sign-container:
-    if: github.ref_name == 'main'
-    name: Sign Container Image
-    environment: prod
-    needs:
-      - build-container
-    permissions:
-      contents: read
-      packages: write
-      id-token: write # needed for signing the images with GitHub OIDC Token
-    runs-on: self-hosted
-    steps:
       - name: Install Cosign
         uses: sigstore/cosign-installer@v3.5.0
 
@@ -108,7 +94,7 @@ jobs:
 
       - name: Sign the images
         env:
-          TAGS: ${{ needs.build-container.outputs.tags }}
+          TAGS: ${{ steps.build-image.outputs.tags }}
           COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
           COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
         run: |
