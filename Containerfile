@@ -23,7 +23,7 @@ COPY rootfs/ /
 RUN dnf install -y code
 
 # Install additional packages
-RUN dnf install -y virt-manager man ceph-base ceph-fuse wine boundary
+RUN dnf install -y virt-manager man ceph-base ceph-fuse wine boundary gnome-network-displays
 
 # Remove unwanted packages
 RUN dnf remove -y firefox
