@@ -40,7 +40,7 @@ RUN rm -Rf /var/roothome
 RUN dnf clean all
 
 RUN QUALIFIED_KERNEL="$(rpm -qa kernel | cut -d- -f2-)" \
-    /usr/libexec/rpm-ostree/wrapped/dracut --no-hostonly --kver "$QUALIFIED_KERNEL" --reproducible -v --add ostree -f "/lib/modules/$QUALIFIED_KERNEL/initramfs.img" \
+    dracut --no-hostonly --kver "$QUALIFIED_KERNEL" --reproducible -v --add ostree -f "/lib/modules/$QUALIFIED_KERNEL/initramfs.img" \
     chmod 0600 "/lib/modules/$QUALIFIED_KERNEL/initramfs.img"
 
 RUN ostree container commit
