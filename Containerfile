@@ -44,3 +44,5 @@ RUN QUALIFIED_KERNEL="$(rpm -qa kernel | cut -d- -f2-)" && \
 RUN rm -Rf /var/roothome
 
 RUN ostree container commit
+
+RUN bootupctl backend generate-update-metadata
