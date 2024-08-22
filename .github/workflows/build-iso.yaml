@@ -39,7 +39,7 @@ jobs:
 
       - name: Build ISO
         id: build
-        uses: JasonN3/build-container-installer@fix_volid
+        uses: JasonN3/build-container-installer@0180c5003041d49b357465562e942aab8c04c71b #fix_volid
         with:
           flatpak_remote_refs_dir: flatpak_refs
           image_name: fedora_workstation
