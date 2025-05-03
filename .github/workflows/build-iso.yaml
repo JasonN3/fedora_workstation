@@ -5,6 +5,7 @@ on:
 
 jobs:
   build-iso:
+    if: github.ref_name == github.event.repository.default_branch
     name: Build ISO Installer
     runs-on: ubuntu-latest
     permissions:

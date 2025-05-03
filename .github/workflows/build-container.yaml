@@ -6,12 +6,23 @@ on:
       - rebuild
 
   push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build-container:
+    strategy:
+      matrix:
+        os:
+          - ubuntu-24.04
+        include:
+          - os: ubuntu-24.04
+            arch: amd64
     name: Build Container Image
-    runs-on: self-hosted
-    environment: prod
+    runs-on: ${{ matrix.os }}
     permissions:
       contents: read
       packages: write
@@ -55,32 +66,6 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Auth with Vault
-        env:
-          VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
-        run: |
-          vault write \
-            -field=token \
-            auth/approle/login \
-            role_id=$(cat /home/runner/.vault-role) \
-            secret_id=${{ secrets.VAULT_SECRET }} > .vault-token
-
-      - name: Run scripts
-        env:
-          VAULT_ADDR: ${{ secrets.VAULT_ADDR }}
-          VAULT_PATH: ${{ secrets.VAULT_PATH }}
-          PREFIX: ${{ secrets.PREFIX }}
-          DOMAIN: ${{ secrets.DOMAIN }}
-          GHCR_AUTH: "${{ github.actor }}:${{ secrets.READ_PACKAGES }}"
-          ROLE_ID: ${{ secrets.ROLE_ID }}
-        run: |
-          export VAULT_TOKEN=$(cat .vault-token)
-          for script in set_perms update_files
-          do
-            chmod +x scripts/${script}/${script}.sh
-            ./scripts/${script}/${script}.sh
-          done
 
       - name: Buildah Build
         id: build-image
@@ -109,6 +94,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Sign the images
+        if: github.ref_name == github.event.repository.default_branch
         env:
           TAGS: ${{ steps.build-image.outputs.tags }}
           COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
