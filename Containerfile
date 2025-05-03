@@ -4,8 +4,7 @@ FROM ghcr.io/jasonn3/fedora_base:main AS workstation
 RUN mkdir /var/lib/alternatives
 
 # Install Workstation
-RUN dnf group install -y 'Fedora Workstation' && \
-    dnf remove -y firefox && \
+RUN dnf install -y @workstation-product-environment --exclude firefox && \
     dnf clean all
 
 # Split custom work to separate image layer
@@ -21,8 +20,5 @@ RUN dnf install -y virt-manager man ceph-base ceph-fuse wine boundary gnome-netw
 
 # Enable services
 #RUN mkdir -p /usr/etc/systemd/system/sockets.target.wants && ln -s /usr/lib/systemd/system/virtqemud.socket /usr/etc/systemd/system/sockets.target.wants/virtqemud.socket
-
-# Cleanup temp directories
-RUN rm -Rf /var/roothome
 
 RUN dnf clean all
