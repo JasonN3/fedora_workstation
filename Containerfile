@@ -1,21 +1,15 @@
 FROM ghcr.io/jasonn3/fedora_base:main AS workstation
 
 # Temporarily create directories needed for installing
-RUN mkdir /var/roothome /var/lib/alternatives
+RUN mkdir /var/lib/alternatives
 
 # Install Workstation
 RUN dnf group install -y 'Fedora Workstation' && \
     dnf remove -y firefox && \
     dnf clean all
 
-# Cleanup temp directories
-RUN rm -Rf /var/roothome
-
 # Split custom work to separate image layer
 FROM workstation
-
-# Temporarily create directories needed for installing
-RUN mkdir /var/roothome
 
 COPY rootfs/ /
 
