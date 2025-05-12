@@ -1,32 +1,19 @@
 FROM ghcr.io/jasonn3/fedora_base:main AS workstation
 
 # Temporarily create directories needed for installing
-RUN mkdir /var/roothome /var/lib/alternatives
+RUN mkdir /var/lib/alternatives
 
 # Install Workstation
-RUN dnf group install -y 'Fedora Workstation'
-
-# Cleanup temp directories
-RUN rm -Rf /var/roothome
-
-RUN dnf clean all
+RUN dnf install -y @workstation-product-environment --exclude firefox && \
+    dnf clean all
 
 # Split custom work to separate image layer
 FROM workstation
 
-# Temporarily create directories needed for installing
-RUN mkdir /var/roothome
-
 COPY rootfs/ /
 
-# Install VSCode
-RUN dnf install -y code
-
 # Install additional packages
-RUN dnf install -y virt-manager man ceph-base ceph-fuse wine boundary gnome-network-displays gstreamer1-plugin-* gstreamer1-vaapi
-
-# Remove unwanted packages
-RUN dnf remove -y firefox
+RUN dnf install -y virt-manager man ceph-base ceph-fuse wine boundary gnome-network-displays gstreamer1-plugin-* gstreamer1-vaapi && dnf clean all
 
 # Disable non-functional services
 # RUN rm /usr/etc/systemd/system/systemd-remount-fs.service
@@ -34,7 +21,6 @@ RUN dnf remove -y firefox
 # Enable services
 #RUN mkdir -p /usr/etc/systemd/system/sockets.target.wants && ln -s /usr/lib/systemd/system/virtqemud.socket /usr/etc/systemd/system/sockets.target.wants/virtqemud.socket
 
-# Cleanup temp directories
-RUN rm -Rf /var/roothome
-
-RUN dnf clean all
+# Copy users and groups from packages
+RUN cp /etc/passwd /usr/etc/passwd && \
+    cp /etc/group /usr/etc/group
