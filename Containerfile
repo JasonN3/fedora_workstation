@@ -21,4 +21,6 @@ RUN dnf install -y virt-manager man ceph-base ceph-fuse wine boundary gnome-netw
 # Enable services
 #RUN mkdir -p /usr/etc/systemd/system/sockets.target.wants && ln -s /usr/lib/systemd/system/virtqemud.socket /usr/etc/systemd/system/sockets.target.wants/virtqemud.socket
 
-RUN dnf clean all
+# Copy users and groups from packages
+RUN cp /etc/passwd /usr/etc/passwd && \
+    cp /etc/group /usr/etc/group
