@@ -4,12 +4,18 @@ on:
   repository_dispatch:
     types:
       - rebuild
+
   push:
     branches:
       - main
+
   pull_request:
     branches:
       - main
+  
+  release:
+    types:
+      - published
 
 jobs:
   build-container:
@@ -106,6 +112,8 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
+          flavor: |
+            latest=auto
           images: |
             ghcr.io/${{ github.repository }}
           tags: |
