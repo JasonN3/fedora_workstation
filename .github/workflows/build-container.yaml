@@ -21,6 +21,12 @@ jobs:
   build-container:
     strategy:
       matrix:
+        variant:
+          - gnome
+          - xfce
+        arch:
+          - amd64
+          - arm64
         include:
           - arch: amd64
             os: ubuntu-24.04
@@ -63,7 +69,7 @@ jobs:
           flavor: |
             suffix=-${{ matrix.arch }}
           images: |
-            ghcr.io/${{ github.repository }}
+            ghcr.io/${{ github.repository }}-${{ matrix.variant }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
@@ -75,7 +81,7 @@ jobs:
         id: build-image
         uses: redhat-actions/buildah-build@v2
         with:
-          containerfiles: Containerfile
+          containerfiles: Containerfile.${{ matrix.variant }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
@@ -89,13 +95,18 @@ jobs:
       - name: Push image
         uses: redhat-actions/push-to-registry@v2
         with:
-          image: ${{ steps.build-image.outputs.image }}
+          image: ${{ steps.build-image.outputs.image }}-${{ matrix.variant }}
           tags: ${{ steps.build-image.outputs.tags }}
           username: ${{ github.actor }}
           password: ${{ github.token }}
 
   combine-tags:
     name: Combine Tags
+    strategy:
+      matrix:
+        variant:
+          - gnome
+          - xfce
     runs-on: ubuntu-24.04
     needs: build-container
     permissions:
@@ -115,7 +126,7 @@ jobs:
           flavor: |
             latest=auto
           images: |
-            ghcr.io/${{ github.repository }}
+            ghcr.io/${{ github.repository }}-${{ matrix.variant }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
@@ -149,13 +160,18 @@ jobs:
       - name: Push manifest
         uses: redhat-actions/push-to-registry@v2
         with:
-          image: ghcr.io/${{ github.repository }}
+          image: ghcr.io/${{ github.repository }}-${{ matrix.variant }}
           tags: ${{ steps.meta.outputs.tags }}
           username: ${{ github.actor }}
           password: ${{ github.token }}
 
   make-raw:
-    name: Create Raw Image
+    name: Create Raw Arm64 Image
+    strategy:
+      matrix:
+        variant:
+          - gnome
+          - xfce
     runs-on: ubuntu-24.04-arm
     needs: build-container
     permissions:
@@ -174,7 +190,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            ghcr.io/${{ github.repository }}
+            ghcr.io/${{ github.repository }}-${{ matrix.variant }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
@@ -244,7 +260,7 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: output-image
+          name: output-image-${{ matrix.variant }}
           path: output/*.raw.xz
 
   tag-release:
@@ -256,6 +272,12 @@ jobs:
       packages: write
     strategy:
       matrix:
+        arch:
+          - amd64
+          - arm64
+        variant:
+          - gnome
+          - xfce
         include:
           - arch: amd64
             os: ubuntu-24.04
@@ -276,7 +298,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            ghcr.io/${{ github.repository }}
+            ghcr.io/${{ github.repository }}-${{ matrix.variant }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
@@ -289,7 +311,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: |
-            ghcr.io/${{ github.repository }}
+            ghcr.io/${{ github.repository }}-${{ matrix.variant }}
           tags: |
             library
 
@@ -302,7 +324,7 @@ jobs:
       - name: Push manifest
         uses: redhat-actions/push-to-registry@v2
         with:
-          image: ghcr.io/${{ github.repository }}
+          image: ghcr.io/${{ github.repository }}-${{ matrix.variant }}
           tags: ${{ steps.meta.outputs.tags }}
           username: ${{ github.actor }}
           password: ${{ github.token }}
