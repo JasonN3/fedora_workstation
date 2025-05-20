@@ -13,7 +13,9 @@ FROM workstation
 COPY rootfs/ /
 
 # Install additional packages
-RUN dnf install -y virt-manager man ceph-base ceph-fuse wine boundary gnome-network-displays gstreamer1-plugin-* gstreamer1-vaapi && dnf clean all
+RUN dnf install -y virt-manager man ceph-base ceph-fuse boundary gnome-network-displays gstreamer1-plugin-* gstreamer1-vaapi && dnf clean all
+# Install wine only for x86_64
+RUN [ "$(uname -m)" = "x86_64" ] && dnf install -y wine || true
 
 # Disable non-functional services
 # RUN rm /usr/etc/systemd/system/systemd-remount-fs.service
