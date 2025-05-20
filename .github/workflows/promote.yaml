@@ -1,0 +1,69 @@
+name: Promote Container Release
+
+on:
+  schedule:
+    - cron: '0 0 * * 0' # Runs at 00:00 UTC every Sunday
+
+jobs:
+  tag-release:
+    name: Promote release
+    permissions:
+      packages: write
+    strategy:
+      matrix:
+        environment:
+          - dev
+          - test
+          - prod
+        include:
+          - os: ubuntu-24.04
+            arch: amd64
+          - os: ubuntu-24.04-arm
+            arch: arm64
+          - environment: dev
+            previous: library
+          - environment: test
+            previous: dev
+          - environment: prod
+            previous: test
+    runs-on: ${{ matrix.os }}
+    environment: ${{ matrix.environment }}
+    steps:
+      - name: Login to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Docker meta
+        id: meta-orig
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/${{ github.repository }}
+          tags: |
+            ${{ matrix.previous }}
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/${{ github.repository }}
+          tags: |
+            ${{ matrix.environment }}
+
+      - name: Pull manifest
+        run: |
+          tag=$(echo "${{ steps.meta-orig.outputs.tags }}" | awk '{print $1}')
+          echo "Pulling ${tag}"
+          sudo podman pull ${tag}
+
+      - name: Push manifest
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ghcr.io/${{ github.repository }}
+          tags: ${{ steps.meta.outputs.tags }}
+          username: ${{ github.actor }}
+          password: ${{ github.token }}

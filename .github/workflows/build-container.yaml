@@ -145,6 +145,7 @@ jobs:
               docker://${tag}-arm64 \
               --arch arm64
           done
+
       - name: Push manifest
         uses: redhat-actions/push-to-registry@v2
         with:
@@ -245,3 +246,62 @@ jobs:
         with:
           name: output-image
           path: output/*.raw.xz
+
+  tag-release:
+    name: Tag Release as Library
+    if: github.event_name == 'release'
+    needs: combine-tags
+    environment: library
+    permissions:
+      packages: write
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-24.04
+            arch: amd64
+          - os: ubuntu-24.04-arm
+            arch: arm64
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Login to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Docker meta
+        id: meta-orig
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/${{ github.repository }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern=v{{version}}
+            type=semver,pattern=v{{major}}.{{minor}}
+            type=semver,pattern=v{{major}}.{{minor}}.{{patch}}
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/${{ github.repository }}
+          tags: |
+            library
+
+      - name: Pull manifest
+        run: |
+          tag=$(echo "${{ steps.meta-orig.outputs.tags }}" | awk '{print $1}')
+          echo "Pulling ${tag}"
+          sudo podman pull ${tag}
+
+      - name: Push manifest
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ghcr.io/${{ github.repository }}
+          tags: ${{ steps.meta.outputs.tags }}
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
