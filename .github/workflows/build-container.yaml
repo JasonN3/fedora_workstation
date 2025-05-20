@@ -168,7 +168,8 @@ jobs:
           tag=$(echo "${{ steps.meta.outputs.tags }}" | awk '{print $1}')
           rootfs=xfs
           bootfs=ext4
-          truncate -s 5G output/arm64.raw
+          size=$(sudo podman images ${tag} --format json | jq '.[].Size/1024/1024/1024 | ceil + 2')
+          truncate -s ${size}G output/arm64.raw
           parted output/arm64.raw mklabel msdos
           parted output/arm64.raw mkpart primary fat16 9MiB 501MiB
           parted output/arm64.raw set 1 boot on
