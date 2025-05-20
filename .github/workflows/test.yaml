@@ -22,6 +22,9 @@ jobs:
           - dev
           - test
           - prod
+        os:
+          - ubuntu-24.04
+          - ubuntu-24.04-arm
         include:
           - os: ubuntu-24.04
             arch: amd64
