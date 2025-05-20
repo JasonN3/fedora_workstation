@@ -186,7 +186,7 @@ jobs:
         run: |
           tag=$(echo "${{ steps.meta.outputs.tags }}" | awk '{print $1}')
           echo "Pulling ${tag}-arm64"
-          sudo podman pull ${tag}-arm64
+          sudo podman pull --authfile ~/.docker/config.json ${tag}-arm64
 
       - name: Create Image
         run: |
