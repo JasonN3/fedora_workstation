@@ -1,0 +1,79 @@
+name: Promote Container Release
+
+on:
+  schedule:
+    - cron: '0 0 * * 0' # Runs at 00:00 UTC every Sunday
+
+jobs:
+  tag-release:
+    name: Promote release
+    permissions:
+      packages: write
+    strategy:
+      matrix:
+        environment:
+          - dev
+          - test
+          - prod
+        arch:
+          - amd64
+          - arm64
+        include:
+          - arch: amd64
+            os: ubuntu-24.04
+          - arch: arm64
+            os: ubuntu-24.04-arm
+          - environment: dev
+            previous: library
+          - environment: test
+            previous: dev
+          - environment: prod
+            previous: test
+    runs-on: ${{ matrix.os }}
+    environment: ${{ matrix.environment }}
+    steps:
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+      - name: Docker meta
+        id: meta-orig
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/${{ github.repository }}
+          tags: |
+            ${{ matrix.previous }}
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/${{ github.repository }}
+          tags: |
+            ${{ matrix.environment }}
+
+      - name: Pull images
+        run: |
+          tag=$(echo "${{ steps.meta-orig.outputs.tags }}" | awk '{print $1}')
+          tag_new=$(echo "${{ steps.meta.outputs.tags }}" | awk '{print $1}')
+          echo "Pulling ${tag}"
+          podman pull ${tag} || exit 1
+          podman pull ${tag_new} || true
+          if [[ $(podman image inspect --format json ${tag} | jq '.[].Digest') != $(podman image inspect --format json ${tag_new} | jq '.[].Digest') ]]
+          then
+            podman rmi ${tag_new} || true
+            podman image tag ${tag} ${{ steps.meta.outputs.tags }}
+          fi
+
+      - name: Push manifest
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ghcr.io/${{ github.repository }}
+          tags: ${{ steps.meta.outputs.tags }}
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
