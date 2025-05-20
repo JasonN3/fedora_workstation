@@ -4,7 +4,6 @@ on:
   repository_dispatch:
     types:
       - rebuild
-
   push:
     branches:
       - main
@@ -18,9 +17,12 @@ jobs:
       matrix:
         os:
           - ubuntu-24.04
+          - ubuntu-24.04-arm
         include:
           - os: ubuntu-24.04
             arch: amd64
+          - os: ubuntu-24.04-arm
+            arch: arm64
     name: Build Container Image
     runs-on: ${{ matrix.os }}
     permissions:
@@ -30,6 +32,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          submodules: recursive
+          fetch-depth: 0
+          fetch-tags: 'true'
 
       - name: Free Disk Space (Ubuntu)
         uses: jlumbroso/free-disk-space@v1.3.1
@@ -51,6 +57,8 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
+          flavor: |
+            suffix=-${{ matrix.arch }}
           images: |
             ghcr.io/${{ github.repository }}
           tags: |
@@ -60,13 +68,6 @@ jobs:
             type=semver,pattern=v{{major}}.{{minor}}
             type=semver,pattern=v{{major}}.{{minor}}.{{patch}}
 
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3.3.0
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
       - name: Buildah Build
         id: build-image
         uses: redhat-actions/buildah-build@v2
@@ -74,7 +75,7 @@ jobs:
           containerfiles: Containerfile
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
-      
+
       - name: Push image
         uses: redhat-actions/push-to-registry@v2
         with:
@@ -82,31 +83,131 @@ jobs:
           tags: ${{ steps.build-image.outputs.tags }}
           username: ${{ github.actor }}
           password: ${{ github.token }}
-  
-      - name: Install Cosign
-        uses: sigstore/cosign-installer@v3.5.0
 
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v3.3.0
+  combine-tags:
+    name: Combine Tags
+    runs-on: ubuntu-24.04
+    needs: build-container
+    permissions:
+      packages: write
+    steps:
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
         with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          images: |
+            ghcr.io/${{ github.repository }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern=v{{version}}
+            type=semver,pattern=v{{major}}.{{minor}}
+            type=semver,pattern=v{{major}}.{{minor}}.{{patch}}
 
-      - name: Sign the images
-        if: github.ref_name == github.event.repository.default_branch
-        env:
-          TAGS: ${{ steps.build-image.outputs.tags }}
-          COSIGN_PRIVATE_KEY: ${{ secrets.COSIGN_PRIVATE_KEY }}
-          COSIGN_PASSWORD: ${{ secrets.COSIGN_PASSWORD }}
+      - name: Pull image
         run: |
-          images=""
-          digest=""
-          for tag in ${TAGS}; do
-            if [[ -z "${digest}" ]]
-            then
-              digest=$(cat $(echo ${tag} | tr '/:' '--')_digest.txt)
-            fi
-            images+="${tag}@${digest} "
+          for tag in ${{ steps.meta.outputs.tags }}
+          do
+            echo "Pulling ${tag}-amd64"
+            podman pull ${tag}-amd64
+            echo "Pulling ${tag}-arm64"
+            podman pull ${tag}-arm64
           done
-          cosign sign --key env://COSIGN_PRIVATE_KEY --yes ${images}
+
+      - name: Generate manifest
+        run: |
+          for tag in ${{ steps.meta.outputs.tags }}
+          do
+            podman manifest create ${tag}
+            podman manifest add ${tag} \
+              docker://${tag}-amd64 \
+              --arch amd64
+            podman manifest add ${tag} \
+              docker://${tag}-arm64 \
+              --arch arm64
+          done
+      - name: Push manifest
+        uses: redhat-actions/push-to-registry@v2
+        with:
+          image: ghcr.io/${{ github.repository }}
+          tags: ${{ steps.meta.outputs.tags }}
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+
+  make-raw:
+    name: Create Raw Image
+    runs-on: ubuntu-24.04-arm
+    needs: build-container
+    permissions:
+      actions: write
+      packages: write
+    steps:
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: |
+            ghcr.io/${{ github.repository }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=semver,pattern=v{{version}}
+            type=semver,pattern=v{{major}}.{{minor}}
+            type=semver,pattern=v{{major}}.{{minor}}.{{patch}}
+
+      - name: Pull image
+        run: |
+          tag=$(echo "${{ steps.meta.outputs.tags }}" | awk '{print $1}')
+          echo "Pulling ${tag}-arm64"
+          sudo podman pull ${tag}-arm64
+
+      - name: Create Image
+        run: |
+          set -euxo pipefail
+          mkdir -p output
+          tag=$(echo "${{ steps.meta.outputs.tags }}" | awk '{print $1}')
+          rootfs=xfs
+          bootfs=ext4
+          truncate -s 5G output/arm64.raw
+          parted output/arm64.raw mklabel msdos
+          parted output/arm64.raw mkpart primary fat16 9MiB 501MiB
+          parted output/arm64.raw set 1 boot on
+          parted output/arm64.raw mkpart primary ${bootfs} 510MiB 1GiB
+          parted output/arm64.raw mkpart primary ${rootfs} 1534MB 100%
+          parted output/arm64.raw print
+          disk=$(sudo losetup --show -P -f output/arm64.raw)
+          sudo mkfs.vfat -F 32 ${disk}p1
+          sudo mkfs.${bootfs} ${disk}p2
+          sudo mkfs.${rootfs} -L root ${disk}p3
+          sudo mkdir -p /mnt/root
+          sudo mount ${disk}p3 /mnt/root
+          sudo mkdir /mnt/root/boot
+          sudo mount ${disk}p2 /mnt/root/boot
+          sudo mkdir /mnt/root/boot/efi
+          sudo mount ${disk}p1 /mnt/root/boot/efi
+          sudo podman run \
+            --rm \
+            --privileged \
+            --pid=host \
+            --security-opt label=type:unconfined_t \
+            -v /dev:/dev \
+            -v /var/lib/containers:/var/lib/containers \
+            -v /mnt/root:/output \
+            ${tag}-arm64 \
+            bootc install to-filesystem \
+              --generic-image \
+              --target-transport containers-storage \
+              --target-imgref ${tag} \
+              /output
+          sudo umount /mnt/root/boot/efi
+          sudo umount /mnt/root/boot
+          sudo umount /mnt/root
+          sudo losetup -d ${disk}
+          echo "Compressing image..."
+          xz -vz -T0 output/arm64.raw
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: output-image
+          path: output/*.raw.xz
