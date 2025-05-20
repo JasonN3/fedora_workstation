@@ -57,11 +57,18 @@ jobs:
           tags: |
             ${{ matrix.environment }}
 
-      - name: Pull manifest
+      - name: Pull images
         run: |
           tag=$(echo "${{ steps.meta-orig.outputs.tags }}" | awk '{print $1}')
+          tag_new=$(echo "${{ steps.meta.outputs.tags }}" | awk '{print $1}')
           echo "Pulling ${tag}"
-          sudo podman pull ${tag}
+          podman pull ${tag} || exit 1
+          podman pull ${tag_new} || true
+          if [[ $(podman image inspect --format json ${tag} | jq '.[].Digest') != $(podman image inspect --format json ${tag_new} | jq '.[].Digest') ]]
+          then
+            podman rmi ${tag_new} || true
+            podman image tag ${tag} ${{ steps.meta.outputs.tags }}
+          fi
 
       - name: Push manifest
         uses: redhat-actions/push-to-registry@v2
