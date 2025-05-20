@@ -164,12 +164,19 @@ jobs:
       - name: Create Image
         run: |
           set -euxo pipefail
+          cleanup() {
+            sudo umount /mnt/root/boot/efi || true
+            sudo umount /mnt/root/boot     || true
+            sudo umount /mnt/root          || true
+            sudo losetup -d "$disk"        || true
+          }
+          trap cleanup EXIT
           mkdir -p output
           tag=$(echo "${{ steps.meta.outputs.tags }}" | awk '{print $1}')
           rootfs=xfs
           bootfs=ext4
-          size=$(sudo podman images ${tag} --format json | jq '.[].Size/1024/1024/1024 | ceil + 2')
-          truncate -s ${size}G output/arm64.raw
+          size=$(sudo podman images ${tag}-arm64 --format json | jq '.[].Size/1024/1024/1024 | ceil + 2')
+          truncate -s ${size}GiB output/arm64.raw
           parted output/arm64.raw mklabel msdos
           parted output/arm64.raw mkpart primary fat16 9MiB 501MiB
           parted output/arm64.raw set 1 boot on
