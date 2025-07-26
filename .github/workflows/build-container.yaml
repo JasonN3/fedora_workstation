@@ -68,9 +68,9 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           flavor: |
-            suffix=-${{ matrix.arch }}
+            suffix=-${{ matrix.variant }}-${{ matrix.arch }}
           images: |
-            ghcr.io/${{ github.repository }}-${{ matrix.variant }}
+            ghcr.io/${{ github.repository }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
@@ -127,24 +127,15 @@ jobs:
         with:
           flavor: |
             latest=auto
+            suffix=-${{ matrix.variant }}
           images: |
-            ghcr.io/${{ github.repository }}-${{ matrix.variant }}
+            ghcr.io/${{ github.repository }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
             type=semver,pattern=v{{version}}
             type=semver,pattern=v{{major}}.{{minor}}
             type=semver,pattern=v{{major}}.{{minor}}.{{patch}}
-
-      - name: Pull image
-        run: |
-          for tag in ${{ steps.meta.outputs.tags }}
-          do
-            echo "Pulling ${tag}-amd64"
-            podman pull ${tag}-amd64
-            echo "Pulling ${tag}-arm64"
-            podman pull ${tag}-arm64
-          done
 
       - name: Generate manifest
         run: |
@@ -162,7 +153,7 @@ jobs:
       - name: Push manifest
         uses: redhat-actions/push-to-registry@v2
         with:
-          image: ghcr.io/${{ github.repository }}-${{ matrix.variant }}
+          image: ghcr.io/${{ github.repository }}
           tags: ${{ steps.meta.outputs.tags }}
           username: ${{ github.actor }}
           password: ${{ github.token }}
@@ -192,8 +183,10 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
+          flavor: |
+            suffix=-${{ matrix.variant }}
           images: |
-            ghcr.io/${{ github.repository }}-${{ matrix.variant }}
+            ghcr.io/${{ github.repository }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
@@ -300,8 +293,10 @@ jobs:
         id: meta-orig
         uses: docker/metadata-action@v5
         with:
+          flavor: |
+            suffix=-${{ matrix.variant }}
           images: |
-            ghcr.io/${{ github.repository }}-${{ matrix.variant }}
+            ghcr.io/${{ github.repository }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
@@ -313,8 +308,10 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
+          flavor: |
+            suffix=-${{ matrix.variant }}
           images: |
-            ghcr.io/${{ github.repository }}-${{ matrix.variant }}
+            ghcr.io/${{ github.repository }}
           tags: |
             library
 
@@ -327,7 +324,7 @@ jobs:
       - name: Push manifest
         uses: redhat-actions/push-to-registry@v2
         with:
-          image: ghcr.io/${{ github.repository }}-${{ matrix.variant }}
+          image: ghcr.io/${{ github.repository }}
           tags: ${{ steps.meta.outputs.tags }}
           username: ${{ github.actor }}
           password: ${{ github.token }}
