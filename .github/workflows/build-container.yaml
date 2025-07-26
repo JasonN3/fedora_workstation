@@ -20,9 +20,10 @@ on:
 jobs:
   build-container:
     strategy:
+      fail-fast: false
       matrix:
         variant:
-          - gnome
+          #- gnome
           - xfce
         arch:
           - amd64
@@ -103,9 +104,10 @@ jobs:
   combine-tags:
     name: Combine Tags
     strategy:
+      fail-fast: false
       matrix:
         variant:
-          - gnome
+          #- gnome
           - xfce
     runs-on: ubuntu-24.04
     needs: build-container
@@ -168,9 +170,10 @@ jobs:
   make-raw:
     name: Create Raw Arm64 Image
     strategy:
+      fail-fast: false
       matrix:
         variant:
-          - gnome
+          #- gnome
           - xfce
     runs-on: ubuntu-24.04-arm
     needs: build-container
