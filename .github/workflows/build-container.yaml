@@ -23,7 +23,7 @@ jobs:
       fail-fast: false
       matrix:
         variant:
-          #- gnome
+          - gnome
           - xfce
         arch:
           - amd64
@@ -107,7 +107,7 @@ jobs:
       fail-fast: false
       matrix:
         variant:
-          #- gnome
+          - gnome
           - xfce
     runs-on: ubuntu-24.04
     needs: build-container
@@ -164,7 +164,7 @@ jobs:
       fail-fast: false
       matrix:
         variant:
-          #- gnome
+          - gnome
           - xfce
     runs-on: ubuntu-24.04-arm
     needs: build-container
