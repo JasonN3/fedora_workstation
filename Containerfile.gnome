@@ -48,7 +48,8 @@ RUN for dir in lib log spool www; \
         find /var/${dir}/${i} -type l -printf "L %p - - - - %l\n" | tee -a /usr/lib/tmpfiles.d/${i}.conf; \
         find /var/${dir}/${i} -type f -printf "f %p %m %u %g - -\n" | tee -a /usr/lib/tmpfiles.d/${i}.conf; \
       done; \
-    done
+    done && \
+    echo "d /var/www 0755 root root - -" | tee -a /usr/lib/tmpfiles.d/html.conf
 
 
 RUN bootc container lint --fatal-warnings
