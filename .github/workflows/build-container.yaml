@@ -78,7 +78,7 @@ jobs:
             type=semver,pattern=v{{major}}.{{minor}}
             type=semver,pattern=v{{major}}.{{minor}}.{{patch}}
 
-      - name: Generate manifest
+      - name: Generate Containerfile
         run: |
           ./gen_workstation.sh ghcr.io/jasonn3/fedora_base:main ${{ matrix.variant }}
 

@@ -17,9 +17,9 @@ case $environment in
 esac
 
 # Get required groups for the requested environment
-groups=$(podman run --rm $1 bash -c "dnf environment info $environment 2> /dev/null" | awk '/Required groups/{flag=1} /Optional groups/{flag=0} flag {sub(/^.*: */, ""); print}')
+groups=$(podman run --rm "$container" bash -c "dnf environment info $environment 2> /dev/null" | awk '/Required groups/{flag=1} /Optional groups/{flag=0} flag {sub(/^.*: */, ""); print}')
 
-groups_num=$(echo ${groups} | wc -w)
+groups_num=$(echo "${groups}" | wc -w)
 
 index=1
 for group in $groups
@@ -27,7 +27,7 @@ do
   echo "Add group $index of ${groups_num}"
   if [[ $index == 1 ]]
   then
-    echo "FROM ghcr.io/jasonn3/fedora_base:main AS group1" > Containerfile
+    echo "FROM ${container} AS group1" > Containerfile
     
     # Install audit separately because the post-install script requires systemd.
     # It only starts the audit service, so it is not required.
