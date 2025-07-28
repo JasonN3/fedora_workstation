@@ -1,0 +1,37 @@
+# Split custom work to separate image layer
+FROM workstation
+
+COPY rootfs/ /
+
+# Install additional packages
+RUN dnf install -y virt-manager man ceph-base ceph-fuse gnome-network-displays gstreamer1-plugin-* gstreamer1-vaapi && \
+    DNF_VAR_releasever=42 dnf install -y boundary && \
+    dnf clean all
+# Install wine only for x86_64
+RUN [ "$(uname -m)" = "x86_64" ] && dnf install -y wine || true
+
+# Disable non-functional services
+# RUN rm /usr/etc/systemd/system/systemd-remount-fs.service
+
+# Enable services
+#RUN mkdir -p /usr/etc/systemd/system/sockets.target.wants && ln -s /usr/lib/systemd/system/virtqemud.socket /usr/etc/systemd/system/sockets.target.wants/virtqemud.socket
+
+# Cleanup
+RUN rm -Rf /var/cache/* \
+           /var/lib/dnf && \
+    find /var/log -type f -delete
+
+RUN for dir in lib log spool; \
+    do \
+      find /var/${dir} -mindepth 1 -maxdepth 1 -type d | while read -r subdir; \
+      do \
+        basename="$(basename "$subdir")"; \
+        conf_file="/usr/lib/tmpfiles.d/${basename}.conf"; \
+        find "$subdir" -type d -printf "d %p %m %u %g - -\n" | tee -a "$conf_file"; \
+        find "$subdir" -type l -printf "L %p - - - - %l\n"   | tee -a "$conf_file"; \
+        find "$subdir" -type f -printf "f %p %m %u %g - -\n" | tee -a "$conf_file"; \
+      done; \
+    done
+
+
+RUN bootc container lint --fatal-warnings

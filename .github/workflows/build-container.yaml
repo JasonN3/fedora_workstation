@@ -20,7 +20,14 @@ on:
 jobs:
   build-container:
     strategy:
+      fail-fast: false
       matrix:
+        variant:
+          - gnome
+          - xfce
+        arch:
+          - amd64
+          - arm64
         include:
           - arch: amd64
             os: ubuntu-24.04
@@ -61,7 +68,7 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           flavor: |
-            suffix=-${{ matrix.arch }}
+            suffix=-${{ matrix.variant }}-${{ matrix.arch }}
           images: |
             ghcr.io/${{ github.repository }}
           tags: |
@@ -70,6 +77,10 @@ jobs:
             type=semver,pattern=v{{version}}
             type=semver,pattern=v{{major}}.{{minor}}
             type=semver,pattern=v{{major}}.{{minor}}.{{patch}}
+
+      - name: Generate Containerfile
+        run: |
+          ./gen_workstation.sh ghcr.io/jasonn3/fedora_base:main ${{ matrix.variant }}
 
       - name: Buildah Build
         id: build-image
@@ -96,6 +107,12 @@ jobs:
 
   combine-tags:
     name: Combine Tags
+    strategy:
+      fail-fast: false
+      matrix:
+        variant:
+          - gnome
+          - xfce
     runs-on: ubuntu-24.04
     needs: build-container
     permissions:
@@ -114,6 +131,7 @@ jobs:
         with:
           flavor: |
             latest=auto
+            suffix=-${{ matrix.variant }}
           images: |
             ghcr.io/${{ github.repository }}
           tags: |
@@ -122,16 +140,6 @@ jobs:
             type=semver,pattern=v{{version}}
             type=semver,pattern=v{{major}}.{{minor}}
             type=semver,pattern=v{{major}}.{{minor}}.{{patch}}
-
-      - name: Pull image
-        run: |
-          for tag in ${{ steps.meta.outputs.tags }}
-          do
-            echo "Pulling ${tag}-amd64"
-            podman pull ${tag}-amd64
-            echo "Pulling ${tag}-arm64"
-            podman pull ${tag}-arm64
-          done
 
       - name: Generate manifest
         run: |
@@ -155,7 +163,13 @@ jobs:
           password: ${{ github.token }}
 
   make-raw:
-    name: Create Raw Image
+    name: Create Raw Arm64 Image
+    strategy:
+      fail-fast: false
+      matrix:
+        variant:
+          - gnome
+          - xfce
     runs-on: ubuntu-24.04-arm
     needs: build-container
     permissions:
@@ -173,6 +187,8 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
+          flavor: |
+            suffix=-${{ matrix.variant }}
           images: |
             ghcr.io/${{ github.repository }}
           tags: |
@@ -244,7 +260,7 @@ jobs:
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: output-image
+          name: output-image-${{ matrix.variant }}
           path: output/*.raw.xz
 
   tag-release:
@@ -256,6 +272,12 @@ jobs:
       packages: write
     strategy:
       matrix:
+        arch:
+          - amd64
+          - arm64
+        variant:
+          - gnome
+          - xfce
         include:
           - arch: amd64
             os: ubuntu-24.04
@@ -275,6 +297,8 @@ jobs:
         id: meta-orig
         uses: docker/metadata-action@v5
         with:
+          flavor: |
+            suffix=-${{ matrix.variant }}
           images: |
             ghcr.io/${{ github.repository }}
           tags: |
@@ -288,6 +312,8 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
+          flavor: |
+            suffix=-${{ matrix.variant }}
           images: |
             ghcr.io/${{ github.repository }}
           tags: |
