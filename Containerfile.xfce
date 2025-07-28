@@ -1,14 +1,3 @@
-FROM ghcr.io/jasonn3/fedora_base:main AS workstation
-
-# Temporarily create directories needed for installing
-RUN mkdir /var/lib/alternatives /var/roothome
-
-# Install Workstation
-RUN dnf install audit -y --setopt=tsflags=noscripts && \
-    dnf install -y @xfce-desktop-environment && \
-    dnf clean all && \
-    rm -Rf /var/roothome
-
 # Split custom work to separate image layer
 FROM workstation
 
