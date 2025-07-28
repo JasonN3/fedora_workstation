@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -euo pipefail
+
 container=$1
 environment=$2
 
@@ -25,7 +27,7 @@ index=1
 for group in $groups
 do
   echo "Add group $index of ${groups_num}"
-  if [[ $index == 1 ]]
+  if [[ $index -eq 1 ]]
   then
     echo "FROM ${container} AS group1" > Containerfile
     
@@ -36,7 +38,7 @@ do
     # Create alternatives directory
     echo "RUN mkdir /var/lib/alternatives" >> Containerfile
   else
-    if [[ $index == ${groups_num} ]]
+    if [[ $index -eq "${groups_num}" ]]
     then
       echo "FROM group$((index - 1)) as workstation" >> Containerfile
     else
@@ -46,7 +48,7 @@ do
   cat << EOF >> Containerfile
 RUN mkdir /var/roothome
 
-RUN dnf group install -y ${group} && \
+RUN dnf group install -y "${group}" && \
     dnf clean all && \
     rm -Rf /var/roothome
 
@@ -54,4 +56,4 @@ EOF
   index=$((index + 1))
 done
 
-cat Containerfile.${2} >> Containerfile
+cat "Containerfile.${2}" >> Containerfile
