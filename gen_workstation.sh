@@ -48,7 +48,10 @@ do
   cat << EOF >> Containerfile
 RUN mkdir /var/roothome
 
-RUN dnf group install -y "${group}" --exclude=firefox && \
+RUN dnf group install -y \
+      "${group}" \
+      --exclude=firefox \
+      --exclude=firefox-langpacks && \
     dnf clean all && \
     rm -Rf /var/roothome
 
