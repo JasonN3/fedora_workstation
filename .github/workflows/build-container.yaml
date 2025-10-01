@@ -50,6 +50,7 @@ jobs:
           sudo mkdir /mnt/containers /mnt/usr_containers
           sudo chown $USER /mnt/usr_containers
           sudo ln -s /mnt/containers /var/lib/containers/storage
+          mkdir -p ~/.local/share/containers
           ln -s /mnt/usr_containers ~/.local/share/containers/storage
           
       - name: Checkout
