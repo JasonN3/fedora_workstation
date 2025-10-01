@@ -42,28 +42,29 @@ jobs:
       packages: write
       id-token: write # needed for signing the images with GitHub OIDC Token
     steps:
+      - name: Replace container storage with /mnt
+        run: |
+          df -h
+          # Make /mnt directories
+          sudo mkdir /mnt/containers /mnt/usr_containers
+          
+          # Set permissions for non-root container storage
+          sudo chown $USER /mnt/usr_containers
+          
+          # Replace root container storage
+          sudo mv /var/lib/containers/storage /var/lib/containers/storage.orig
+          sudo ln -s /mnt/containers /var/lib/containers/storage
+          
+          # Replace user container storage
+          mkdir -p ~/.local/share/containers
+          ln -s /mnt/usr_containers ~/.local/share/containers/storage
+          
       - name: Checkout
         uses: actions/checkout@v5
         with:
           submodules: recursive
           fetch-depth: 0
           fetch-tags: 'true'
-
-      - name: Free Disk Space (Ubuntu)
-        uses: jlumbroso/free-disk-space@v1.3.1
-        with:
-          # this might remove tools that are actually needed,
-          # if set to "true" but frees about 6 GB
-          tool-cache: false
-          
-          # all of these default to true, but feel free to set to
-          # "false" if necessary for your workflow
-          android: true
-          dotnet: true
-          haskell: true
-          large-packages: true
-          docker-images: true
-          swap-storage: true
 
       - name: Docker meta
         id: meta
@@ -106,6 +107,11 @@ jobs:
           tags: ${{ steps.build-image.outputs.tags }}
           username: ${{ github.actor }}
           password: ${{ github.token }}
+
+      - name: Show remaining space
+        if: failure()
+        run: |
+          df -h
 
   combine-tags:
     name: Combine Tags
