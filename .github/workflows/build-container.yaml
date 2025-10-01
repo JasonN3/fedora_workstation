@@ -47,7 +47,7 @@ jobs:
           df -h
           sudo mv /var/lib/containers/storage /var/lib/containers/storage.orig
           sudo mkdir /mnt/containers
-          ln -s /mnt/containers /var/lib/containers/storage
+          sudo ln -s /mnt/containers /var/lib/containers/storage
           
       - name: Checkout
         uses: actions/checkout@v5
