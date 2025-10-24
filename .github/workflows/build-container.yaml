@@ -266,7 +266,7 @@ jobs:
           xz -vz -T0 output/arm64.raw
 
       - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: output-image-${{ matrix.variant }}
           path: output/*.raw.xz
