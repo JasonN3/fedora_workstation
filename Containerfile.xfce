@@ -4,8 +4,16 @@ FROM workstation
 COPY rootfs/ /
 
 # Install additional packages
-RUN dnf install -y virt-manager man ceph-base ceph-fuse gnome-network-displays gstreamer1-plugin-* gstreamer1-vaapi && \
-    DNF_VAR_releasever=42 dnf install -y boundary && \
+RUN dnf install -y \
+      virt-manager \
+      man \
+      ceph-base \
+      ceph-fuse \
+      fuse-libs \
+      gnome-network-displays \
+      gstreamer1-plugin-* \
+      gstreamer1-vaapi && \
+    dnf --enable-repo=hashicorp install -y boundary && \
     dnf clean all
 # Install wine only for x86_64
 RUN [ "$(uname -m)" = "x86_64" ] && dnf install -y wine || true
