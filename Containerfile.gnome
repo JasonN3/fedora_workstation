@@ -16,8 +16,8 @@ RUN dnf install -y \
     dnf --enable-repo=hashicorp install -y boundary && \
     dnf clean all
 
-# Install wine only for x86_64
-RUN [ "$(uname -m)" = "x86_64" ] && dnf install -y wine || true
+# Install wine and winetricks only for x86_64
+RUN [ "$(uname -m)" = "x86_64" ] && dnf install -y wine winetricks || true
 
 # Disable non-functional services
 # RUN rm /usr/etc/systemd/system/systemd-remount-fs.service
