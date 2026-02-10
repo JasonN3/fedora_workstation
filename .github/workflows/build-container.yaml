@@ -60,7 +60,7 @@ jobs:
           ln -s /mnt/usr_containers ~/.local/share/containers/storage
           
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           submodules: recursive
           fetch-depth: 0
