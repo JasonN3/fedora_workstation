@@ -224,19 +224,18 @@ jobs:
           trap cleanup EXIT
           mkdir -p output
           tag=$(echo "${{ steps.meta.outputs.tags }}" | awk '{print $1}')
-          rootfs=xfs
-          bootfs=ext4
-          size=$(sudo podman images ${tag}-arm64 --format json | jq '.[].Size/1024/1024/1024 | ceil + 2')
+          rootfs=btrfs
+          size=$(sudo podman images ${tag}-arm64 --format json | jq '.[].Size/1024/1024/1024 | ceil + 4')
           truncate -s ${size}GiB output/arm64.raw
-          parted output/arm64.raw mklabel msdos
-          parted output/arm64.raw mkpart primary fat16 9MiB 501MiB
-          parted output/arm64.raw set 1 boot on
-          parted output/arm64.raw mkpart primary ${bootfs} 510MiB 1GiB
-          parted output/arm64.raw mkpart primary ${rootfs} 1534MiB 100%
+          parted output/arm64.raw mklabel gpt
+          parted output/arm64.raw mkpart EFI fat32 1MiB 601MiB
+          parted output/arm64.raw set 1 esp on
+          parted output/arm64.raw mkpart boot ext4 601MiB 1625MiB
+          parted output/arm64.raw mkpart root ${rootfs} 1625MiB 100%
           parted output/arm64.raw print
           disk=$(sudo losetup --show -P -f output/arm64.raw)
           sudo mkfs.vfat -F 32 ${disk}p1
-          sudo mkfs.${bootfs} ${disk}p2
+          sudo mkfs.ext4 ${disk}p2
           sudo mkfs.${rootfs} -L root ${disk}p3
           sudo mkdir -p /mnt/root
           sudo mount ${disk}p3 /mnt/root
@@ -255,6 +254,7 @@ jobs:
             ${tag}-arm64 \
             bootc install to-filesystem \
               --generic-image \
+              --skip-fetch-check \
               --target-transport containers-storage \
               --target-imgref ${tag} \
               /output
