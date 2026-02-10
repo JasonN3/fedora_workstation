@@ -225,7 +225,7 @@ jobs:
           mkdir -p output
           tag=$(echo "${{ steps.meta.outputs.tags }}" | awk '{print $1}')
           rootfs=btrfs
-          size=$(sudo podman images ${tag}-arm64 --format json | jq '.[].Size/1024/1024/1024 | ceil + 2')
+          size=$(sudo podman images ${tag}-arm64 --format json | jq '.[].Size/1024/1024/1024 | ceil + 4')
           truncate -s ${size}GiB output/arm64.raw
           parted output/arm64.raw mklabel gpt
           parted output/arm64.raw mkpart primary fat32 1MiB 601MiB
