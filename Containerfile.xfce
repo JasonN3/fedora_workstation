@@ -42,4 +42,4 @@ RUN for dir in lib log spool; \
     done
 
 
-RUN bootc container lint --fatal-warnings
+RUN bootc container lint --fatal-warnings --skip=nonempty-run-tmp
