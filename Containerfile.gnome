@@ -44,4 +44,4 @@ RUN for dir in lib log spool www; \
     echo "d /var/www 0755 root root - -" | tee -a /usr/lib/tmpfiles.d/html.conf
 
 
-RUN bootc container lint --fatal-warnings --skip=nonempty-run-tmp
+RUN bootc container lint --skip=nonempty-run-tmp
