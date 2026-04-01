@@ -30,6 +30,8 @@ do
   if [[ $index -eq 1 ]]
   then
     echo "FROM ${container} AS group1" > Containerfile
+
+    echo "COPY rootfs/ /"
     
     # Install audit separately because the post-install script requires systemd.
     # It only starts the audit service, so it is not required.

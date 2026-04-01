@@ -1,8 +1,6 @@
 # Split custom work to separate image layer
 FROM workstation
 
-COPY rootfs/ /
-
 # Install additional packages
 RUN dnf install -y \
       virt-manager \

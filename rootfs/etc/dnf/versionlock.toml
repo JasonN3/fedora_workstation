@@ -1,0 +1,10 @@
+version = "1.0"
+
+[[packages]]
+name = "gnome-shell"
+comment = "49.5-1 crashes when a monitor is removed"
+
+[[packages.conditions]]
+key = "evr"
+comparator = "="
+value = "49.4-2.fc43"
