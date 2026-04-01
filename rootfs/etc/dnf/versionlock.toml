@@ -7,4 +7,4 @@ comment = "49.5-1 crashes when a monitor is removed"
 [[packages.conditions]]
 key = "evr"
 comparator = "="
-value = "49.4-2.fc43"
+value = "49.4-1.fc43"
