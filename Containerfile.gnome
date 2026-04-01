@@ -19,6 +19,13 @@ RUN dnf install -y \
 # Install wine and winetricks only for x86_64
 RUN [ "$(uname -m)" = "x86_64" ] && dnf install -y wine winetricks || true
 
+# Install netbird
+RUN dnf install -y \
+      libappindicator-gtk3 \
+      libappindicator \
+      netbird-ui \
+      gnome-shell-extension-appindicator
+
 # Disable non-functional services
 # RUN rm /usr/etc/systemd/system/systemd-remount-fs.service
 
