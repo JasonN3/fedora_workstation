@@ -23,15 +23,15 @@ RUN if [ "$(uname -m)" = "x86_64" ]; \
     fi
 
 # Install netbird
+# Prevent post script for netbird from running because it tries to start the service, which is not possible during build
 RUN if [ "$(uname -m)" = "x86_64" ]; \
     then \
       dnf install -y \
         libappindicator-gtk3 \
         libappindicator \
         gnome-shell-extension-appindicator; \
-      # Prevent post script from running because it tries to start the service, which is not possible during build
       dnf install -y --setopt=tsflags=noscripts \
-        netbird-ui
+        netbird-ui; \
     fi
 
 # Disable non-functional services
