@@ -17,7 +17,22 @@ RUN dnf install -y \
     dnf clean all
 
 # Install wine and winetricks only for x86_64
-RUN [ "$(uname -m)" = "x86_64" ] && dnf install -y wine winetricks || true
+RUN if [ "$(uname -m)" = "x86_64" ]; \
+    then \
+      dnf install -y wine winetricks; \
+    fi
+
+# Install netbird
+# Prevent post script for netbird from running because it tries to start the service, which is not possible during build
+RUN if [ "$(uname -m)" = "x86_64" ]; \
+    then \
+      dnf install -y \
+        libappindicator-gtk3 \
+        libappindicator \
+        gnome-shell-extension-appindicator; \
+      dnf install -y --setopt=tsflags=noscripts \
+        netbird-ui; \
+    fi
 
 # Disable non-functional services
 # RUN rm /usr/etc/systemd/system/systemd-remount-fs.service
