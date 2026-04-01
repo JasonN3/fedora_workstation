@@ -31,7 +31,7 @@ do
   then
     echo "FROM ${container} AS group1" > Containerfile
 
-    echo "COPY rootfs/ /"
+    echo "COPY rootfs/ /" >> Containerfile
     
     # Install audit separately because the post-install script requires systemd.
     # It only starts the audit service, so it is not required.
