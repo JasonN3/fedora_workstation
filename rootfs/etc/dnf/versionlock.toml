@@ -1,0 +1,10 @@
+version = "1.0"
+
+[[packages]]
+name = "mutter"
+comment = "causes gnome-shell to crash whenever a monitor is removed"
+
+[[packages.conditions]]
+key = "evr"
+comparator = "!="
+value = "49.5-1.fc43"
