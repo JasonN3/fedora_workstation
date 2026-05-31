@@ -11,7 +11,9 @@ RUN dnf install -y \
       gnome-network-displays \
       gstreamer1-plugin-* \
       gstreamer1-vaapi && \
-    dnf --enable-repo=hashicorp install -y boundary && \
+    ( dnf --enable-repo=hashicorp install -y boundary || \
+      dnf --releasever=$(( $(grep ^VERSION_ID= /etc/os-release | cut -d= -f2) - 1 )) --enable-repo=hashicorp install boundary \
+    ) && \
     dnf clean all
 
 # Install wine and winetricks only for x86_64
