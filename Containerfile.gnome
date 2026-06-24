@@ -8,6 +8,7 @@ RUN dnf install -y \
       ceph-base \
       ceph-fuse \
       fuse-libs \
+      geoclue2 \
       gnome-network-displays \
       gstreamer1-plugin-* \
       gstreamer1-vaapi && \
