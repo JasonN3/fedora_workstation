@@ -71,7 +71,7 @@ jobs:
           fi
 
       - name: Push manifest
-        uses: redhat-actions/push-to-registry@v2
+        uses: redhat-actions/push-to-registry@v3
         with:
           image: ghcr.io/${{ github.repository }}
           tags: ${{ steps.meta.outputs.tags }}
