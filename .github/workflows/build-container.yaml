@@ -19,6 +19,10 @@ on:
     types:
       - published
 
+  schedule:
+    # Patch Tuesday (Second Tuesday of the month)
+    - cron: "0 9 8-14 * 2"
+
 jobs:
   build-container:
     strategy:
