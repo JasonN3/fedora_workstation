@@ -41,6 +41,10 @@ RUN if [ "$(uname -m)" = "x86_64" ]; \
 # Enable services
 #RUN mkdir -p /usr/etc/systemd/system/sockets.target.wants && ln -s /usr/lib/systemd/system/virtqemud.socket /usr/etc/systemd/system/sockets.target.wants/virtqemud.socket
 
+# Install dependencies for AI
+RUN dnf install -y mesa-vulkan-drivers mesa-libGL openvino openvino-devel && \
+    curl -fsSL https://ollama.com/install.sh | sh
+
 # Cleanup
 RUN rm -Rf /var/cache/* \
            /var/lib/dnf && \
