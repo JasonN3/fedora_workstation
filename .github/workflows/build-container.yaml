@@ -105,7 +105,7 @@ jobs:
           password: ${{ github.token }}
 
       - name: Push image
-        uses: redhat-actions/push-to-registry@v2
+        uses: redhat-actions/push-to-registry@v3
         with:
           image: ${{ steps.build-image.outputs.image }}
           tags: ${{ steps.build-image.outputs.tags }}
@@ -167,7 +167,7 @@ jobs:
           done
 
       - name: Push manifest
-        uses: redhat-actions/push-to-registry@v2
+        uses: redhat-actions/push-to-registry@v3
         with:
           image: ghcr.io/${{ github.repository }}
           tags: ${{ steps.meta.outputs.tags }}
@@ -338,7 +338,7 @@ jobs:
           sudo podman pull ${tag}
 
       - name: Push manifest
-        uses: redhat-actions/push-to-registry@v2
+        uses: redhat-actions/push-to-registry@v3
         with:
           image: ghcr.io/${{ github.repository }}
           tags: ${{ steps.meta.outputs.tags }}
